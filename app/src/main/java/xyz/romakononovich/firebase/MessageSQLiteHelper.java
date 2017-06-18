@@ -33,7 +33,7 @@ public class MessageSQLiteHelper extends SQLiteOpenHelper{
     public void onCreate(SQLiteDatabase db) {
         String createDbStatement = "CREATE TABLE "
                 + TABLE_NAME + "(" + COLUMN_TIME
-                + " integer primary key, " + COLUMN_MESSAGE
+                + " text not null, " + COLUMN_MESSAGE
                 + " text not null, " + COLUMN_TITLE
                 + " text not null);";
 

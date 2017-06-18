@@ -19,6 +19,7 @@ public class MessageDataSource {
     private SQLiteDatabase sqLiteDatabase;
 
 
+
     public MessageDataSource(Context context){
         messageSQLiteHelper = new MessageSQLiteHelper(context);
     }
@@ -41,18 +42,21 @@ public class MessageDataSource {
     }
     List<Message> getAllMessage(){
         List<Message> messageList = new ArrayList<>();
-        Cursor cursor = sqLiteDatabase.query(MessageSQLiteHelper.TABLE_NAME,
-                new String[]{MessageSQLiteHelper.COLUMN_TIME, MessageSQLiteHelper.COLUMN_MESSAGE,MessageSQLiteHelper.COLUMN_TITLE},null,null,null,null,null);
-        cursor.moveToFirst();
+        if (sqLiteDatabase!=null) {
+            Cursor cursor = sqLiteDatabase.query(MessageSQLiteHelper.TABLE_NAME,
+                    new String[]{MessageSQLiteHelper.COLUMN_TIME, MessageSQLiteHelper.COLUMN_MESSAGE, MessageSQLiteHelper.COLUMN_TITLE}, null, null, null, null, null);
+
+            cursor.moveToFirst();
         while (!cursor.isAfterLast()) {
             Message message = new Message();
-            message.setTime(String.valueOf(cursor.getLong(0)));
+            message.setTime(cursor.getString(0));
             message.setMessage(cursor.getString(1));
             message.setTitle(cursor.getString(2));
             messageList.add(message);
             cursor.moveToNext();
         }
         cursor.close();
+        }
         return messageList;
     }
 }

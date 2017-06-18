@@ -10,10 +10,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 
-public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ItemViewHolder> {
-    public List<Message> list = new ArrayList<>();
 
-    public MessageAdapter(ArrayList<Message> mList) {
+public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ItemViewHolder> {
+    public List<Message> list;
+
+    public MessageAdapter(List<Message> mList) {
         list =mList;
     }
 
@@ -34,7 +35,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ItemView
     public void onBindViewHolder(ItemViewHolder holder, int position) {
         holder.message.setText(list.get(position).getMessage());
         holder.time.setText(list.get(position).getTime());
-        holder.title.setText(list.get(position).getTitle());
+        //holder.title.setText(list.get(position).getTitle());
     }
 
     @Override
@@ -43,12 +44,12 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ItemView
     }
 
     public class ItemViewHolder extends RecyclerView.ViewHolder {
-        private TextView title;
+        //private TextView title;
         private TextView time;
         private TextView message;
         public ItemViewHolder(View itemView) {
             super(itemView);
-            title = (TextView) itemView.findViewById(R.id.tv_title);
+            //title = (TextView) itemView.findViewById(R.id.tv_title);
             time = (TextView) itemView.findViewById(R.id.tv_time);
             message = (TextView) itemView.findViewById(R.id.tv_message);
         }

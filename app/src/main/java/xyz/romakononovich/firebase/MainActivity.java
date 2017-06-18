@@ -33,8 +33,10 @@ public class MainActivity extends AppCompatActivity implements ChildEventListene
     private MessageAdapter adapter;
     private RecyclerView rv;
     private MessageDataSource messageDataSource;
-    private DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
-    ArrayList<Message> mList = new ArrayList<>();
+    private DateFormat dateFormat = new SimpleDateFormat("dd MMM HH:mm:ss", Locale.getDefault());
+    private static List<Message> list = new ArrayList<>();
+
+    //ArrayList<Message> mList = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,23 +52,23 @@ public class MainActivity extends AppCompatActivity implements ChildEventListene
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
         rv.setLayoutManager(linearLayoutManager);
         rv.setHasFixedSize(true);
-        adapter = new MessageAdapter(mList);
-        rv.setAdapter(adapter);
         messageDataSource = new MessageDataSource(getApplicationContext());
         databaseReference = FirebaseDatabase.getInstance().getReference("message");
+
 
         if (FirebaseAuth.getInstance().getCurrentUser() != null){
             userDataBaseReference = databaseReference.child(getUserName());
 
-            //messageDataBaseReference = userDataBaseReference.child(getUserName());
-
         }
+
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        List<Message> list = messageDataSource.getAllMessage();
+        if(messageDataSource!=null) {
+            list = messageDataSource.getAllMessage();
+        }
         for (Message m: list) {
             Log.d("TAG", m.toString());
         }
@@ -93,8 +95,8 @@ public class MainActivity extends AppCompatActivity implements ChildEventListene
         Message messageObject = new Message();
         messageObject.setTitle(title);
         messageObject.setMessage(message);
-        messageObject.setTime(String.valueOf(System.currentTimeMillis()));
-        userDataBaseReference.child(messageObject.getTime()).setValue(messageObject);
+        messageObject.setTime(dateFormat.format(new Date()));
+        userDataBaseReference.child(String.valueOf(System.currentTimeMillis())).setValue(messageObject);
         //adapter.addItem(messageObject);
     }
 
@@ -105,10 +107,13 @@ public class MainActivity extends AppCompatActivity implements ChildEventListene
         if (firebaseUser == null) {
             startActivity(new Intent(this, SignUpActivity.class));
         } else {
-            //System.nanoTime() - 10*1000*1000*1000
-
             userDataBaseReference.addChildEventListener(this);
             messageDataSource.open();
+            list = messageDataSource.getAllMessage();
+            adapter = new MessageAdapter(list);
+            rv.setAdapter(adapter);
+            adapter.notifyDataSetChanged();
+
 
         }
     }
@@ -126,9 +131,15 @@ public class MainActivity extends AppCompatActivity implements ChildEventListene
     public void onChildAdded(DataSnapshot dataSnapshot, String s) {
         showSnackBar();
         Message message = dataSnapshot.getValue(Message.class);
-        message.setId(Long.parseLong(dataSnapshot.getKey()));
-        adapter.addItem(message);
-        messageDataSource.addMessage(message);
+        if(!list.contains(message)) {
+            messageDataSource.addMessage(message);
+            list.add(message);
+            adapter.addItem(message);
+        }
+        //message.setId(Long.parseLong(dataSnapshot.getKey()));
+
+        //messageDataSource.addMessage(message);
+        adapter.notifyDataSetChanged();
         Log.d("TAG",dataSnapshot.toString());
     }
 

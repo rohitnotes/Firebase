@@ -1,5 +1,7 @@
 package xyz.romakononovich.firebase;
 
+import java.util.Objects;
+
 /**
  * Created by romank on 13.06.17.
  */
@@ -50,5 +52,14 @@ public class Message {
                 ", title='" + title + '\'' +
                 ", id=" + id +
                 '}';
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        Message other = (Message) obj;
+        if (!Objects.equals(time, other.time)) {
+            return false;
+        }
+        return true;
     }
 }
