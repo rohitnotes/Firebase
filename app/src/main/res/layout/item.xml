@@ -11,23 +11,19 @@
     app:contentPaddingBottom="10dp">
 
         <TextView
-            android:id="@+id/tv_message"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:gravity="right"
-            android:background="@drawable/bubble_out"
-            tools:text="Message"
-            android:layout_centerVertical="true"
-            android:layout_alignParentStart="true" />
-
-
-
-        <TextView
             android:id="@+id/tv_time"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@id/tv_message"
-            android:layout_marginTop="15dp"
-            tools:text="Time"/>
+            tools:text="Time"
+            android:layout_centerHorizontal="true"/>
 
+        <TextView
+            android:id="@+id/tv_message"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/bubble_out"
+            tools:text="Message"
+            android:layout_centerVertical="true"
+            android:layout_below="@id/tv_time"
+             />
 </RelativeLayout>

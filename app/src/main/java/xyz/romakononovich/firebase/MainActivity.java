@@ -33,7 +33,8 @@ public class MainActivity extends AppCompatActivity implements ChildEventListene
     private MessageAdapter adapter;
     private RecyclerView rv;
     private MessageDataSource messageDataSource;
-    private DateFormat dateFormat = new SimpleDateFormat("dd MMM HH:mm:ss", Locale.getDefault());
+    private DateFormat dateFormat = new SimpleDateFormat("dd MMM HH:mm", Locale.getDefault());
+    private String id;
     private static List<Message> list = new ArrayList<>();
 
     //ArrayList<Message> mList = new ArrayList<>();
@@ -78,25 +79,27 @@ public class MainActivity extends AppCompatActivity implements ChildEventListene
     private void showDialog() {
         final Dialog dialog = new Dialog(this);
         dialog.setContentView(R.layout.layout_dialog);
-        final EditText editTitle = (EditText) dialog.findViewById(R.id.et_title);
+        //final EditText editTitle = (EditText) dialog.findViewById(R.id.et_title);
         final EditText editMessge = (EditText) dialog.findViewById(R.id.et_message);
 
         dialog.findViewById(R.id.btn_ok).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                addMessage(editTitle.getText().toString(),editMessge.getText().toString());
+                addMessage(editMessge.getText().toString());
                 dialog.cancel();
             }
         });
         dialog.show();
     }
 
-    private void addMessage(String title, String message) {
+    private void addMessage( String message) {
         Message messageObject = new Message();
-        messageObject.setTitle(title);
+        //messageObject.setTitle(title);
         messageObject.setMessage(message);
         messageObject.setTime(dateFormat.format(new Date()));
-        userDataBaseReference.child(String.valueOf(System.currentTimeMillis())).setValue(messageObject);
+        id = String.valueOf(System.currentTimeMillis());
+        messageObject.setId(id);
+        userDataBaseReference.child(id).setValue(messageObject);
         //adapter.addItem(messageObject);
     }
 
@@ -129,9 +132,10 @@ public class MainActivity extends AppCompatActivity implements ChildEventListene
 
     @Override
     public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-        showSnackBar();
+
         Message message = dataSnapshot.getValue(Message.class);
         if(!list.contains(message)) {
+            showSnackBar();
             messageDataSource.addMessage(message);
             list.add(message);
             adapter.addItem(message);
@@ -144,7 +148,7 @@ public class MainActivity extends AppCompatActivity implements ChildEventListene
     }
 
     private void showSnackBar() {
-        Snackbar.make(this.getCurrentFocus(),"Беседа обновлена...",Snackbar.LENGTH_LONG).show();
+        Snackbar.make(this.getCurrentFocus(),"Беседа обновлена...",Snackbar.LENGTH_SHORT).show();
     }
 
 

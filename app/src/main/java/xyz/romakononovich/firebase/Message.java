@@ -10,13 +10,13 @@ public class Message {
     private String time;
     private String message;
     private String title;
-    private long id;
+    private String id;
 
-    public long getId() {
+    public String getId() {
         return id;
     }
 
-    public void setId(long id) {
+    public void setId(String id) {
         this.id = id;
     }
     public String getTime() {
@@ -57,7 +57,7 @@ public class Message {
     @Override
     public boolean equals(Object obj) {
         Message other = (Message) obj;
-        if (!Objects.equals(time, other.time)) {
+        if (!Objects.equals(id, other.id)) {
             return false;
         }
         return true;
