@@ -7,3 +7,15 @@
 /build
 /captures
 .externalNativeBuild
+gradle-wrapper.properties
+gradlew
+gradlew.bat
+compiler.xml
+gradle.xml
+misc.xml
+modules.xml
+runConfigurations.xml
+gradle-wrapper.jar
+profiles_settings.xml
+google-services.json
+vcs.xml
