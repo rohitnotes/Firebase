@@ -59,7 +59,6 @@ public class MainActivity extends AppCompatActivity implements ChildEventListene
 
         if (FirebaseAuth.getInstance().getCurrentUser() != null){
             userDataBaseReference = databaseReference.child(getUserName());
-
         }
 
     }
@@ -112,7 +111,8 @@ public class MainActivity extends AppCompatActivity implements ChildEventListene
         } else {
             userDataBaseReference.addChildEventListener(this);
             messageDataSource.open();
-            list = messageDataSource.getAllMessage();
+            list.clear();
+            list.addAll(messageDataSource.getAllMessage());
             adapter = new MessageAdapter(list);
             rv.setAdapter(adapter);
             adapter.notifyDataSetChanged();
