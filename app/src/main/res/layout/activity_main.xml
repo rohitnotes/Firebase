@@ -5,7 +5,10 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context="xyz.romakononovich.firebase.MainActivity">
+      <include layout="@layout/toolbar"
+              android:id="@+id/include_toolbar"/>
         <android.support.v7.widget.RecyclerView
+            android:layout_marginTop="?attr/actionBarSize"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:id="@+id/rv">

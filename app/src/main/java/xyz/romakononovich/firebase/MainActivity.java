@@ -2,15 +2,24 @@ package xyz.romakononovich.firebase;
 
 import android.app.Dialog;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.graphics.Bitmap;
+import android.net.Uri;
+import android.provider.MediaStore;
+import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.ImageView;
 
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.ChildEventListener;
@@ -18,7 +27,12 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
 
+import java.io.IOException;
+import java.net.URI;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -35,7 +49,13 @@ public class MainActivity extends AppCompatActivity implements ChildEventListene
     private MessageDataSource messageDataSource;
     private DateFormat dateFormat = new SimpleDateFormat("dd MMM HH:mm", Locale.getDefault());
     private String id;
+    private Toolbar mActionBarToolbar;
+    private ImageView mImageView;
     private static List<Message> list = new ArrayList<>();
+    private static final int REQUEST = 1;
+    SharedPreferences preferences;
+    private FirebaseStorage storage;
+
 
     //ArrayList<Message> mList = new ArrayList<>();
 
@@ -43,6 +63,7 @@ public class MainActivity extends AppCompatActivity implements ChildEventListene
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        preferences = this.getSharedPreferences("xyz.romakononovich.firebase", MODE_PRIVATE);
         findViewById(R.id.fab).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -57,10 +78,65 @@ public class MainActivity extends AppCompatActivity implements ChildEventListene
         databaseReference = FirebaseDatabase.getInstance().getReference("message");
 
 
+
+
+
+        mActionBarToolbar = (Toolbar) findViewById(R.id.toolbar_actionbar);
+        mImageView = (ImageView) findViewById(R.id.toolbar_img);
+        setSupportActionBar(mActionBarToolbar);
+        mImageView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent  = new Intent(Intent.ACTION_PICK);
+                intent.setType("image/*");
+                startActivityForResult(intent,REQUEST);
+            }
+        });
+
+
+
         if (FirebaseAuth.getInstance().getCurrentUser() != null){
             userDataBaseReference = databaseReference.child(getUserName());
+            userDataBaseReference.keepSynced(true);
         }
 
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        Bitmap img = null;
+        if(requestCode == REQUEST && resultCode == RESULT_OK) {
+            Uri selectedImg = data.getData();
+           firebase(selectedImg);
+            try {
+                img = MediaStore.Images.Media.getBitmap(getContentResolver(), selectedImg);
+             } catch (IOException e) {
+                e.printStackTrace();
+            }
+            mImageView.setImageBitmap(img);
+
+        }
+
+    }
+
+    private void firebase(Uri selectedImg) {
+        storage = FirebaseStorage.getInstance();
+        StorageReference storageReference = storage.getReference();
+        StorageReference avatarRef = storageReference.child("/image/"+selectedImg.getLastPathSegment());
+        UploadTask uploadTask = avatarRef.putFile(selectedImg);
+        uploadTask.addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+
+            }
+        }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+
+            @Override
+            public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                Uri downloadUrl = taskSnapshot.getDownloadUrl();
+            }
+        });
     }
 
     @Override
@@ -119,6 +195,7 @@ public class MainActivity extends AppCompatActivity implements ChildEventListene
 
 
         }
+
     }
 
     @Override
@@ -128,6 +205,7 @@ public class MainActivity extends AppCompatActivity implements ChildEventListene
             userDataBaseReference.removeEventListener(this);
             messageDataSource.close();
         }
+        preferences.edit().putString("img","").apply();
     }
 
     @Override
