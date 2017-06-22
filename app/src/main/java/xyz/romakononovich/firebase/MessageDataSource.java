@@ -1,7 +1,6 @@
 package xyz.romakononovich.firebase;
 
 
-import android.app.PendingIntent;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
@@ -10,10 +9,11 @@ import android.database.sqlite.SQLiteDatabase;
 import java.util.ArrayList;
 import java.util.List;
 
+import xyz.romakononovich.firebase.Models.Message;
+
 import static xyz.romakononovich.firebase.MessageSQLiteHelper.COLUMN_ID;
 import static xyz.romakononovich.firebase.MessageSQLiteHelper.COLUMN_MESSAGE;
 import static xyz.romakononovich.firebase.MessageSQLiteHelper.COLUMN_TIME;
-import static xyz.romakononovich.firebase.MessageSQLiteHelper.COLUMN_TITLE;
 
 public class MessageDataSource {
     private MessageSQLiteHelper messageSQLiteHelper;

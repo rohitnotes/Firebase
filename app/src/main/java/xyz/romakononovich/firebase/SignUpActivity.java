@@ -1,5 +1,6 @@
 package xyz.romakononovich.firebase;
 
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -33,13 +34,17 @@ public class SignUpActivity extends AppCompatActivity {
         });
     }
 
-    private void login(String email, String pass) {
+    private void login(final String email, String pass) {
         auth.signInWithEmailAndPassword(email, pass)
                 .addOnCompleteListener(new OnCompleteListener<AuthResult>() {
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         if (task.isSuccessful()) {
-                            startActivity(new Intent(getApplicationContext(), MainActivity.class));
+                            Context context = getApplicationContext();
+                            Intent intent = new Intent(context,MainActivity.class);
+                            intent.putExtra("email",email);
+
+                            startActivity(intent);
                             finish();
                         } else {
                             Toast.makeText(getApplicationContext(), task.getException().getMessage(), Toast.LENGTH_LONG).show();
@@ -58,7 +63,11 @@ public class SignUpActivity extends AppCompatActivity {
             public void onComplete(@NonNull Task<AuthResult> task) {
                 if (task.isSuccessful()) {
                     //FirebaseUser firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
-                    startActivity(new Intent(getApplicationContext(), MainActivity.class));
+                    Context context = getApplicationContext();
+                    Intent intent = new Intent(context,MainActivity.class);
+                    intent.putExtra("email",email);
+
+                    startActivity(intent);
                     finish();
                 } else {
                     login(email, pass);

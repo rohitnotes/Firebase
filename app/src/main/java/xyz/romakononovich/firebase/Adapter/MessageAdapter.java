@@ -1,4 +1,4 @@
-package xyz.romakononovich.firebase;
+package xyz.romakononovich.firebase.Adapter;
 
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -6,9 +6,10 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import java.util.ArrayList;
 import java.util.List;
 
+import xyz.romakononovich.firebase.Models.Message;
+import xyz.romakononovich.firebase.R;
 
 
 public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ItemViewHolder> {

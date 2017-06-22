@@ -27,12 +27,12 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 
 import java.io.IOException;
-import java.net.URI;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -40,10 +40,15 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
+import xyz.romakononovich.firebase.Adapter.MessageAdapter;
+import xyz.romakononovich.firebase.Models.Message;
+import xyz.romakononovich.firebase.Models.Profiles;
+
 public class MainActivity extends AppCompatActivity implements ChildEventListener {
     private DatabaseReference databaseReference;
     private DatabaseReference userDataBaseReference;
-    private DatabaseReference messageDataBaseReference;
+    private DatabaseReference userProfileDataBaseReference;
+    private DatabaseReference profileDataBaseReference;
     private MessageAdapter adapter;
     private RecyclerView rv;
     private MessageDataSource messageDataSource;
@@ -55,6 +60,8 @@ public class MainActivity extends AppCompatActivity implements ChildEventListene
     private static final int REQUEST = 1;
     SharedPreferences preferences;
     private FirebaseStorage storage;
+    private String email;
+    Profiles profiles;
 
 
     //ArrayList<Message> mList = new ArrayList<>();
@@ -76,7 +83,10 @@ public class MainActivity extends AppCompatActivity implements ChildEventListene
         rv.setHasFixedSize(true);
         messageDataSource = new MessageDataSource(getApplicationContext());
         databaseReference = FirebaseDatabase.getInstance().getReference("message");
-
+        profileDataBaseReference = FirebaseDatabase.getInstance().getReference("profiles");
+        if(getIntent().getExtras()!=null) {
+            email = getIntent().getExtras().getString("email");
+        }
 
 
 
@@ -97,7 +107,11 @@ public class MainActivity extends AppCompatActivity implements ChildEventListene
 
         if (FirebaseAuth.getInstance().getCurrentUser() != null){
             userDataBaseReference = databaseReference.child(getUserName());
+           userProfileDataBaseReference =  profileDataBaseReference.child(getUserName());
             userDataBaseReference.keepSynced(true);
+        if(email!=null) {
+            addProfile(email);
+        }
         }
 
     }
@@ -122,7 +136,7 @@ public class MainActivity extends AppCompatActivity implements ChildEventListene
 
     private void firebase(Uri selectedImg) {
         storage = FirebaseStorage.getInstance();
-        StorageReference storageReference = storage.getReference();
+        final StorageReference storageReference = storage.getReference();
         StorageReference avatarRef = storageReference.child("/image/"+selectedImg.getLastPathSegment());
         UploadTask uploadTask = avatarRef.putFile(selectedImg);
         uploadTask.addOnFailureListener(new OnFailureListener() {
@@ -134,10 +148,20 @@ public class MainActivity extends AppCompatActivity implements ChildEventListene
 
             @Override
             public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                Uri downloadUrl = taskSnapshot.getDownloadUrl();
+               // @SuppressWarnings("VisibleForTests") Uri downloadUrl = taskSnapshot.getDownloadUrl();
+             //   profiles.setUri(taskSnapshot.getDownloadUrl());
+               // userProfileDataBaseReference.setValue(profiles);
+               //profileDataBaseReference.child(profileDataBaseReference.getKey()).setValue(profiles);
             }
         });
+
+
+
+        //profiles.setUri(uri);
+        Log.d("TAG",profiles.toString());
+        userProfileDataBaseReference.setValue(profiles);
     }
+
 
     @Override
     protected void onResume() {
@@ -154,7 +178,6 @@ public class MainActivity extends AppCompatActivity implements ChildEventListene
     private void showDialog() {
         final Dialog dialog = new Dialog(this);
         dialog.setContentView(R.layout.layout_dialog);
-        //final EditText editTitle = (EditText) dialog.findViewById(R.id.et_title);
         final EditText editMessge = (EditText) dialog.findViewById(R.id.et_message);
 
         dialog.findViewById(R.id.btn_ok).setOnClickListener(new View.OnClickListener() {
@@ -167,15 +190,19 @@ public class MainActivity extends AppCompatActivity implements ChildEventListene
         dialog.show();
     }
 
+    private void addProfile (String email) {
+        Profiles profiles = new Profiles();
+        profiles.setName(email.substring(0,email.indexOf("@")));
+        profiles.setId(email);
+        profileDataBaseReference.child(email.replace(".", "_")).setValue(profiles);
+    }
     private void addMessage( String message) {
         Message messageObject = new Message();
-        //messageObject.setTitle(title);
         messageObject.setMessage(message);
         messageObject.setTime(dateFormat.format(new Date()));
         id = String.valueOf(System.currentTimeMillis());
         messageObject.setId(id);
         userDataBaseReference.child(id).setValue(messageObject);
-        //adapter.addItem(messageObject);
     }
 
     @Override
@@ -192,6 +219,19 @@ public class MainActivity extends AppCompatActivity implements ChildEventListene
             adapter = new MessageAdapter(list);
             rv.setAdapter(adapter);
             adapter.notifyDataSetChanged();
+            userProfileDataBaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    profiles = dataSnapshot.getValue(Profiles.class);
+                    Log.d("TAG",profiles.toString());
+                }
+
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+
+                }
+            });
+
 
 
         }

@@ -1,4 +1,4 @@
-package xyz.romakononovich.firebase;
+package xyz.romakononovich.firebase.Models;
 
 import java.util.Objects;
 
