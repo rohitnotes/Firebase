@@ -8,7 +8,7 @@ import android.widget.TextView;
 
 import java.util.List;
 
-import xyz.romakononovich.firebase.Models.Message;
+import xyz.romakononovich.firebase.models.Message;
 import xyz.romakononovich.firebase.R;
 
 

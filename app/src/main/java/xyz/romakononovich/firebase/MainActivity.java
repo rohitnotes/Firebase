@@ -41,8 +41,8 @@ import java.util.List;
 import java.util.Locale;
 
 import xyz.romakononovich.firebase.Adapter.MessageAdapter;
-import xyz.romakononovich.firebase.Models.Message;
-import xyz.romakononovich.firebase.Models.Profiles;
+import xyz.romakononovich.firebase.models.Message;
+import xyz.romakononovich.firebase.models.Profiles;
 
 public class MainActivity extends AppCompatActivity implements ChildEventListener {
     private DatabaseReference databaseReference;
@@ -87,7 +87,6 @@ public class MainActivity extends AppCompatActivity implements ChildEventListene
         if(getIntent().getExtras()!=null) {
             email = getIntent().getExtras().getString("email");
         }
-
 
 
 
@@ -148,10 +147,12 @@ public class MainActivity extends AppCompatActivity implements ChildEventListene
 
             @Override
             public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+
+                taskSnapshot.getDownloadUrl();
                // @SuppressWarnings("VisibleForTests") Uri downloadUrl = taskSnapshot.getDownloadUrl();
              //   profiles.setUri(taskSnapshot.getDownloadUrl());
                // userProfileDataBaseReference.setValue(profiles);
-               //profileDataBaseReference.child(profileDataBaseReference.getKey()).setValue(profiles);
+               profileDataBaseReference.child(profileDataBaseReference.getKey()).setValue(profiles);
             }
         });
 
@@ -193,7 +194,6 @@ public class MainActivity extends AppCompatActivity implements ChildEventListene
     private void addProfile (String email) {
         Profiles profiles = new Profiles();
         profiles.setName(email.substring(0,email.indexOf("@")));
-        profiles.setId(email);
         profileDataBaseReference.child(email.replace(".", "_")).setValue(profiles);
     }
     private void addMessage( String message) {

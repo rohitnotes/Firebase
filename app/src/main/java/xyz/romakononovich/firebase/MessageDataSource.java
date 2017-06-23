@@ -9,7 +9,7 @@ import android.database.sqlite.SQLiteDatabase;
 import java.util.ArrayList;
 import java.util.List;
 
-import xyz.romakononovich.firebase.Models.Message;
+import xyz.romakononovich.firebase.models.Message;
 
 import static xyz.romakononovich.firebase.MessageSQLiteHelper.COLUMN_ID;
 import static xyz.romakononovich.firebase.MessageSQLiteHelper.COLUMN_MESSAGE;
