@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">Firebase</string>
+    <string name="alert_no_gps_permission">Ну как хочешь</string>
 </resources>
