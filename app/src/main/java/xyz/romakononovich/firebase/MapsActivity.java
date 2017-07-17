@@ -149,7 +149,7 @@ public class MapsActivity extends AppCompatActivity
                 bindLocationService();
 
             } else {
-                new AlertDialog.Builder(this).setMessage(R.string.alert_no_gps_permission).
+                new AlertDialog.Builder(this).setMessage(R.string.alert_no_camera_permission).
                         setNeutralButton(android.R.string.ok, new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
@@ -165,7 +165,7 @@ public class MapsActivity extends AppCompatActivity
                 setupMap();
 
             } else {
-                new AlertDialog.Builder(this).setMessage(R.string.alert_no_gps_permission).
+                new AlertDialog.Builder(this).setMessage(R.string.alert_no_camera_permission).
                         setNeutralButton(android.R.string.ok, new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {

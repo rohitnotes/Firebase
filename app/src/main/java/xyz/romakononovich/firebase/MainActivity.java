@@ -40,7 +40,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
-import xyz.romakononovich.firebase.Adapter.MessageAdapter;
+import xyz.romakononovich.firebase.adapter.MessageAdapter;
 import xyz.romakononovich.firebase.models.Message;
 import xyz.romakononovich.firebase.models.Profiles;
 

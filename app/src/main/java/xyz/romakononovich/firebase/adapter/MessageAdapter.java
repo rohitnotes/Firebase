@@ -1,4 +1,4 @@
-package xyz.romakononovich.firebase.Adapter;
+package xyz.romakononovich.firebase.adapter;
 
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
