@@ -18,10 +18,12 @@ import android.support.v4.content.FileProvider;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.VideoView;
 
 import java.io.File;
 import java.io.IOException;
@@ -35,8 +37,10 @@ public class CameraActivity extends AppCompatActivity {
     private static final int REQUEST_PHOTO_PERMISSIONS_CODE = 204;
     private static final int REQUEST_VIDEO_PERMISSIONS_CODE = 205;
     private final static int CODE = 203;
+    private static final int REQUEST_VIDEO_CAPTURE = 2;
     private TextView textView;
     private ImageView imageView;
+    private VideoView videoView;
     private Button btn_left;
     private Button btn_right;
     private String mCurrentPhotoPath;
@@ -49,6 +53,7 @@ public class CameraActivity extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         textView = (TextView) findViewById(R.id.textView);
+        videoView = (VideoView) findViewById(R.id.videoView);
         imageView = (ImageView) findViewById(R.id.imageView);
         btn_left = (Button) findViewById(R.id.button_left);
         btn_right = (Button) findViewById(R.id.button_right);
@@ -60,6 +65,8 @@ public class CameraActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 if (Build.VERSION.SDK_INT<=Build.VERSION_CODES.KITKAT||checkMyPermission()) {
+                    imageView.setVisibility(View.VISIBLE);
+                    videoView.setVisibility(View.GONE);
                     takePhoto();
                 } else {
                     requestMyPermission(REQUEST_PHOTO_PERMISSIONS_CODE);
@@ -72,7 +79,10 @@ public class CameraActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 if (Build.VERSION.SDK_INT<=Build.VERSION_CODES.KITKAT||checkMyPermission()) {
+                    videoView.setVisibility(View.VISIBLE);
+                    imageView.setVisibility(View.GONE);
                     recVideo();
+                    videoView.start();
                 } else {
                     requestMyPermission(REQUEST_VIDEO_PERMISSIONS_CODE);
 
@@ -116,14 +126,18 @@ public class CameraActivity extends AppCompatActivity {
     }
 
     @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
+    protected void onActivityResult(int requestCode, int resultCode, Intent intent) {
+        super.onActivityResult(requestCode, resultCode, intent);
         if(requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK) {
 //            Bundle extras = data.getExtras();
 //            Bitmap imageBitmap = (Bitmap) extras.get("data");
             imageView.setImageURI(Uri.parse(mCurrentPhotoPath));
-
+        } else if(requestCode == REQUEST_VIDEO_CAPTURE && resultCode == RESULT_OK) {
+            Log.d(TAG, "Intent hashCode "+intent.hashCode());
+            Uri videoUri = intent.getData();
+            videoView.setVideoURI(videoUri);
         }
+
 
     }
 
@@ -141,7 +155,29 @@ public class CameraActivity extends AppCompatActivity {
     }
 
     private void recVideo() {
+        Intent takeVideoIntent = new Intent(MediaStore.ACTION_VIDEO_CAPTURE);
+        if(takeVideoIntent.resolveActivity(getPackageManager()) !=null) {
+            Log.d(TAG,"Intent before startActivity hashCode "+takeVideoIntent.hashCode());
+            takeVideoIntent.putExtra(MediaStore.EXTRA_VIDEO_QUALITY,1);
+            takeVideoIntent.putExtra(MediaStore.EXTRA_OUTPUT,getVideoFileURi());
+            startActivityForResult(takeVideoIntent,REQUEST_VIDEO_CAPTURE);
+
+        }
+
         int i=0;
+    }
+
+    private Uri getVideoFileURi() {
+        File mediaStorageDir = new File (Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES),"Hello camera");
+        if(!mediaStorageDir.exists()) {
+            if(!mediaStorageDir.mkdirs()) {
+                Log.d(TAG,"Dir creation failed...");
+                return null;
+            }
+        }
+        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(new Date());
+        File mediaFile = new File(mediaStorageDir.getPath() +File.separator + "VID_" + timeStamp + ".mp4");
+        return Uri.fromFile(mediaFile);
     }
 
 

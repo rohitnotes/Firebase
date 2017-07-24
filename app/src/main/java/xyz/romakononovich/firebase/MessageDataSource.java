@@ -39,6 +39,9 @@ public class MessageDataSource {
         //contentValues.put(COLUMN_TITLE,message.getTitle());
         sqLiteDatabase.insert(COLUMN_MESSAGE,null,contentValues);
     }
+
+
+
     private void delMessage(){
 
     }
