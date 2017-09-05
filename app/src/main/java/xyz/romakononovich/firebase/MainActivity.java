@@ -62,6 +62,7 @@ public class MainActivity extends AppCompatActivity implements ChildEventListene
     private FirebaseStorage storage;
     private String email;
     Profiles profiles;
+    private String TAG = MainActivity.class.getSimpleName();
 
 
     //ArrayList<Message> mList = new ArrayList<>();
@@ -212,27 +213,29 @@ public class MainActivity extends AppCompatActivity implements ChildEventListene
         if (firebaseUser == null) {
             startActivity(new Intent(this, SignUpActivity.class));
         } else {
-            userDataBaseReference.addChildEventListener(this);
-            messageDataSource.open();
-            list.clear();
-            list.addAll(messageDataSource.getAllMessage());
-            adapter = new MessageAdapter(list);
-            rv.setAdapter(adapter);
-            adapter.notifyDataSetChanged();
-            userProfileDataBaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
-                @Override
-                public void onDataChange(DataSnapshot dataSnapshot) {
-                    profiles = dataSnapshot.getValue(Profiles.class);
-                    Log.d("TAG",profiles.toString());
-                }
-
-                @Override
-                public void onCancelled(DatabaseError databaseError) {
-
-                }
-            });
-
-
+            Log.d(TAG,"UID: "+ firebaseUser.getUid());
+            startActivity(new Intent(this, CameraActivity.class));
+//            userDataBaseReference.addChildEventListener(this);
+//            messageDataSource.open();
+//            list.clear();
+//            list.addAll(messageDataSource.getAllMessage());
+//            adapter = new MessageAdapter(list);
+//            rv.setAdapter(adapter);
+//            adapter.notifyDataSetChanged();
+//            userProfileDataBaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
+//                @Override
+//                public void onDataChange(DataSnapshot dataSnapshot) {
+//                    profiles = dataSnapshot.getValue(Profiles.class);
+//                    Log.d("TAG",profiles.toString());
+//                }
+//
+//                @Override
+//                public void onCancelled(DatabaseError databaseError) {
+//
+//                }
+//            });
+//
+//
 
         }
 

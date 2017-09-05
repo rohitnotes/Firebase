@@ -3,6 +3,7 @@ package xyz.romakononovich.firebase;
 import android.Manifest;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.net.Uri;
@@ -13,8 +14,10 @@ import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.annotation.RequiresApi;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.LoaderManager;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.FileProvider;
+import android.support.v4.content.Loader;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -25,25 +28,39 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.VideoView;
 
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.storage.FileDownloadTask;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
+
 import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 
-public class CameraActivity extends AppCompatActivity {
+import xyz.romakononovich.firebase.loaders.AvatarLoader;
+
+public class CameraActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<String> {
     private static final int REQUEST_IMAGE_CAPTURE = 1;
     private final static String TAG = CameraActivity.class.getSimpleName();
     private static final int REQUEST_PHOTO_PERMISSIONS_CODE = 204;
     private static final int REQUEST_VIDEO_PERMISSIONS_CODE = 205;
     private final static int CODE = 203;
     private static final int REQUEST_VIDEO_CAPTURE = 2;
+
     private TextView textView;
     private ImageView imageView;
     private VideoView videoView;
     private Button btn_left;
     private Button btn_right;
     private String mCurrentPhotoPath;
+    private static final int CODE_AVATAR_LOADER = 1;
 
 
     @Override
@@ -92,6 +109,13 @@ public class CameraActivity extends AppCompatActivity {
 
 
         });
+        String imageUri = getSharedPreferences(Constants.SHARED_PREFERENCES_NAME,MODE_PRIVATE).getString(Constants.KEY_URI,null);
+        if(imageUri!=null) {
+            imageView.setImageURI(Uri.parse(imageUri));
+        } else {
+            imageView.setImageResource(R.mipmap.ic_launcher);
+            getSupportLoaderManager().initLoader(CODE_AVATAR_LOADER,null,this).forceLoad();
+        }
 
     }
 
@@ -132,6 +156,8 @@ public class CameraActivity extends AppCompatActivity {
 //            Bundle extras = data.getExtras();
 //            Bitmap imageBitmap = (Bitmap) extras.get("data");
             imageView.setImageURI(Uri.parse(mCurrentPhotoPath));
+            getSharedPreferences(Constants.SHARED_PREFERENCES_NAME,MODE_PRIVATE).edit().putString(Constants.KEY_URI,mCurrentPhotoPath).apply();
+            saveImageToStorage();
         } else if(requestCode == REQUEST_VIDEO_CAPTURE && resultCode == RESULT_OK) {
             Log.d(TAG, "Intent hashCode "+intent.hashCode());
             Uri videoUri = intent.getData();
@@ -139,6 +165,31 @@ public class CameraActivity extends AppCompatActivity {
         }
 
 
+    }
+
+    private void saveImageToStorage() {
+        FirebaseStorage storage= FirebaseStorage.getInstance();
+        String storageFileName = "image/"+ FirebaseAuth.getInstance().getCurrentUser().getUid()+"/avatar.jpg";
+        StorageReference storageReference = storage.getReference();
+        StorageReference avatarImagesRef = storageReference.child(storageFileName);
+        Uri file = Uri.fromFile(new File(mCurrentPhotoPath));
+        UploadTask uploadTask = avatarImagesRef.putFile(file);
+        uploadTask.addOnCompleteListener(new OnCompleteListener<UploadTask.TaskSnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<UploadTask.TaskSnapshot> task) {
+                if(task.isSuccessful()) {
+                    Log.d(TAG, "avatar upload successfully");
+                } else {
+                    Log.d(TAG, "WTF");
+                }
+            }
+        });
+        uploadTask.addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                Log.d(TAG, "image uploading error : "+e.getMessage());
+            }
+        });
     }
 
     private void requestMyPermission(int code) {
@@ -218,4 +269,20 @@ public class CameraActivity extends AppCompatActivity {
         }
     }
 
+    @Override
+    public Loader<String> onCreateLoader(int id, Bundle args) {
+        return new AvatarLoader(getApplicationContext());
+    }
+
+    @Override
+    public void onLoadFinished(Loader<String> loader, String data) {
+        Log.d(TAG, "onLoadFinished: "+data);
+        imageView.setImageURI(Uri.parse(data));
+
+    }
+
+    @Override
+    public void onLoaderReset(Loader<String> loader) {
+
+    }
 }
